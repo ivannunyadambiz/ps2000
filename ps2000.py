@@ -395,6 +395,15 @@ def print_info(ps):
     ps.get_actual(True)
     # print('set voltage      %f %f' % (ps.set_voltage(12.34), ps.get_voltage_setpoint()))
     # ps.get_actual(True)
+    
+def set_voltage_and_current(ps, voltage, current):
+    if voltage is not None:
+        print(f"Setting voltage to {voltage}V")
+        ps.set_voltage(voltage)
+    if current is not None:
+        print(f"Setting current to {current}A")
+        ps.set_current(current)
+    print(f"New setpoints - Voltage: {ps.get_voltage_setpoint()}V, Current: {ps.get_current_setpoint()}A")
 
 
 if __name__ == "__main__":
@@ -403,20 +412,26 @@ if __name__ == "__main__":
         '-p', '--port', type=str, help='serial port to use', required=True)
     parser.add_argument('-v', '--verbose', action='store_true')
 
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument('--on', help='turn on', action='store_true')
     group.add_argument('--off', help='turn off', action='store_true')
     group.add_argument('--toggle', help='toggle', action='store_true')
-    group.add_argument('--info', help='toggle', action='store_true')
+    group.add_argument('--info', help='show device info', action='store_true')
+    
+    parser.add_argument('--voltage', type=float, help='set voltage in volts')
+    parser.add_argument('--current', type=float, help='set current in amperes')
+    
     args = parser.parse_args()
 
     with ps2000(args.port) as ps:
-
         if args.verbose:
-            print("Vset: {}".format(ps.get_voltage_setpoint()))
-            print("Iset: {}".format(ps.get_current_setpoint()))
-            print("Vact: {}".format(ps.get_actual()['v']))
-            print("Iact: {}".format(ps.get_actual()['i']))
+            print(f"Vset: {ps.get_voltage_setpoint()}")
+            print(f"Iset: {ps.get_current_setpoint()}")
+            print(f"Vact: {ps.get_actual()['v']}")
+            print(f"Iact: {ps.get_actual()['i']}")
+
+        if args.voltage is not None or args.current is not None:
+            set_voltage_and_current(ps, args.voltage, args.current)
 
         if args.on:
             print("turning on")
@@ -436,5 +451,5 @@ if __name__ == "__main__":
 
         if args.verbose:
             time.sleep(1)
-            print("Vact: {}".format(ps.get_actual()['v']))
-            print("Iact: {}".format(ps.get_actual()['i']))
+            print(f"Vact: {ps.get_actual()['v']}")
+            print(f"Iact: {ps.get_actual()['i']}")
