@@ -368,6 +368,18 @@ class ps2000(object):
         actual['i'] = self.i_nom * ((ans[4] << 8) + ans[5]) / 25600
 
         return actual
+        
+    def set_voltage_and_current(self, voltage, current):
+        if voltage is not None:
+            if self.verbose:
+                print(f"Setting voltage to {voltage}V")
+            self.set_voltage(voltage)
+        if current is not None:
+            if self.verbose:
+                print(f"Setting current to {current}A")
+            self.set_current(current)
+        if self.verbose:
+            print(f"New setpoints - Voltage: {self.get_voltage_setpoint()}V, Current: {self.get_current_setpoint()}A")
 
 
 def check_available(port, target="PS 2042"):
@@ -395,16 +407,6 @@ def print_info(ps):
     ps.get_actual(True)
     # print('set voltage      %f %f' % (ps.set_voltage(12.34), ps.get_voltage_setpoint()))
     # ps.get_actual(True)
-    
-def set_voltage_and_current(ps, voltage, current):
-    if voltage is not None:
-        print(f"Setting voltage to {voltage}V")
-        ps.set_voltage(voltage)
-    if current is not None:
-        print(f"Setting current to {current}A")
-        ps.set_current(current)
-    print(f"New setpoints - Voltage: {ps.get_voltage_setpoint()}V, Current: {ps.get_current_setpoint()}A")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Control PS2000 power supply')
@@ -431,7 +433,7 @@ if __name__ == "__main__":
             print(f"Iact: {ps.get_actual()['i']}")
 
         if args.voltage is not None or args.current is not None:
-            set_voltage_and_current(ps, args.voltage, args.current)
+            ps.set_voltage_and_current(args.voltage, args.current)
 
         if args.on:
             print("turning on")
